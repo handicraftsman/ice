@@ -4,7 +4,9 @@
          ice-start-server
          write-string-response)
   (import scheme)
-  (import (chicken io))      
+  (import (chicken base))
+  (import (chicken io))
+  (import (chicken condition))
   (import tcp6)
   (import intarweb)
   (import srfi-18)
@@ -15,8 +17,11 @@
     handler)
 
   (define (initial-handler i o h)
-    (define req (read-request i))
-    (h req i o)
+    
+    (condition-case           
+     (h (read-request i) i o) 
+     [var () (print-error-message var) (print-call-chain)])
+
     (close-input-port i)
     (close-output-port o))
   

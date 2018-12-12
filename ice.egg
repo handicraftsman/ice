@@ -1,4 +1,5 @@
 ((author "Nickolay Ilyushin")
+ (version "0.1.0")
  (synopsis "A functional, low level web server toolkit")
  (license "MIT")
  (dependencies tcp6 intarweb srfi-18 defstruct uri-common sequences sha1 base64 message-digest)

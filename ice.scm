@@ -2,7 +2,9 @@
         (ice-server
          ice-make-server
          ice-start-server
-         write-string-response)
+         write-string-response
+         set-default-headers
+         push-header)
   (import scheme)
   (import (chicken base))
   (import (chicken io))
@@ -44,10 +46,19 @@
     (thread-start! thr)
     thr)
 
-  (define (write-string-response o str)
-    (define res (make-response port: o))
+  (define (write-string-response o str #!key [code 200])
+    (define res (make-response port: o code: code))
+    (set-default-headers res)
     (write-response res)
     (finish-response-body res)
     (write-line str o))
+
+  (define (set-default-headers res)
+    (push-header `(server (("Ice" "0" "Chicken"))) res))
+
+  (define (push-header h res)
+    (response-headers-set! res
+                           (headers `(,h)
+                                    (response-headers res))))
   
 )

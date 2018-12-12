@@ -1,9 +1,9 @@
 ((author "Nickolay Ilyushin")
- (synopsis "A functional, low level web application toolkit")
+ (synopsis "A functional, low level web server toolkit")
  (license "MIT")
- (dependencies tcp6 intarweb srfi-18 defstruct uri-common)
+ (dependencies tcp6 intarweb srfi-18 defstruct uri-common sequences sha1 base64 message-digest)
  (components
   (extension ice)
   (extension ice-router)
   (program ice-example
-           (component-dependencies ice ice-router))))
+   (component-dependencies ice ice-router))))

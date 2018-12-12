@@ -32,18 +32,51 @@
       #f]
      [#t #f]))
   
-  (define (ice-route routes req i o)
+  ;; (define (ice-route routes req i o)
+  ;;   (if (null-list? routes)
+  ;;       (let [(res (make-response port: o code: 404))]
+  ;;         (write-response res)
+  ;;         (finish-response-body res)
+  ;;         (write-line "404 not found" o))
+  ;;       (let* [(r (car routes))
+  ;;              (pattern (car r))
+  ;;              (handler (cdr r))
+  ;;              (params  (pattern-match pattern (cdr (uri-path (request-uri req))) '()))]
+  ;;         (if params
+  ;;             (handler params req i o)
+  ;;             (ice-route (cdr routes) req i o)))))
+
+  (define (get-route-handler routes req i o)
     (if (null-list? routes)
-        (let [(res (make-response port: o code: 404))]
-          (write-response res)
-          (finish-response-body res)
-          (write-line "404 not found" o))
+        #f
         (let* [(r (car routes))
-               (pattern (car r))
-               (handler (cdr r))
-               (params  (pattern-match pattern (cdr (uri-path (request-uri req))) '()))]
-          (if params
-              (handler params req i o)
-              (ice-route (cdr routes) req i o)))))
+               (pattern (car r))]
+          (cond
+           [(and (symbol? pattern) (string= (symbol->string pattern) "any"))
+            (let [(handler (cdr r))]
+              (lambda () (handler '() req i o)))]
+           [(symbol? pattern)
+            (if (string= (symbol->string pattern) (symbol->string (request-method req)))
+                (let [(h (get-route-handler (cdr r) req i o))]
+                  (if h
+                      h
+                      (get-route-handler (cdr routes) req i o)))
+                (get-route-handler (cdr routes) req i o))]
+           [(list? pattern)
+            (let* [(handler (cdr r))
+                   (params  (pattern-match pattern (cdr (uri-path (request-uri req))) '()))]
+              (if params
+                  (lambda () (handler params req i o))
+                  (get-route-handler (cdr routes) req i o)))]
+           [#t #f]))))
   
+  (define (ice-route routes req i o)
+    (let [(h (get-route-handler routes req i o))]
+      (if h
+          (h)
+          (let [(res (make-response port: o code: 404))]
+            (write-response res)
+            (finish-response-body res)
+            (write-line "404 not found" o)))))
+
 )

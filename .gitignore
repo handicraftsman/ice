@@ -1,0 +1,6 @@
+ice-example
+*.so
+*.o
+ice.*.sh
+*.link
+*.import.scm

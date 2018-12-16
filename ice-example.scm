@@ -1,8 +1,10 @@
 (import scheme)
 (import (chicken format))
 (import (chicken plist))
+(import (chicken io))
 (import ice)
 (import ice-router)
+(import ice-websocket)
 (import intarweb)
 (import srfi-18)
 
@@ -21,6 +23,31 @@
 (define (post-page-any params req i o)
   (write-string-response o "Please use POST"))
 
+(define (ws-page params req i o)
+  (define (w)
+    (sleep 2)
+    (print "asd"))
+  (define (wo)
+    (define res (make-response port: o))
+    (set-default-headers res)
+    (push-header `(|Content-Type| #("text/html" raw)) res)
+    (write-response res)
+    (finish-response-body res)
+    (define s "<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket test</title>
+    <script>
+      var s = new WebSocket(\"wss://new.hellomouse.net:8081/websocket\");
+    </script>
+  </head>
+  <body>
+    <p>WebSocket test</p>
+  </body>
+</html>")
+    (write-string s (string-length s) o))
+  (with-websocket req i o with: w without: wo))
+
 (define (error-404-page params req i o)
   (write-string-response o "Sorry, but i cannot find this page" #:code 404))
 
@@ -29,6 +56,7 @@
                 (("hello" #:who) . ,hello-page)
                 (POST . ((("post") . ,post-page-post)))
                 (("post")        . ,post-page-any)
+                (("websocket")   . ,ws-page)
                 (any             . ,error-404-page)))
 
 (define (handler req i o)

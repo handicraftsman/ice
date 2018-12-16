@@ -31,20 +31,6 @@
      [(and (not (null-list? pattern)) (null-list? path))
       #f]
      [#t #f]))
-  
-  ;; (define (ice-route routes req i o)
-  ;;   (if (null-list? routes)
-  ;;       (let [(res (make-response port: o code: 404))]
-  ;;         (write-response res)
-  ;;         (finish-response-body res)
-  ;;         (write-line "404 not found" o))
-  ;;       (let* [(r (car routes))
-  ;;              (pattern (car r))
-  ;;              (handler (cdr r))
-  ;;              (params  (pattern-match pattern (cdr (uri-path (request-uri req))) '()))]
-  ;;         (if params
-  ;;             (handler params req i o)
-  ;;             (ice-route (cdr routes) req i o)))))
 
   (define (get-route-handler routes req i o)
     (if (null-list? routes)
